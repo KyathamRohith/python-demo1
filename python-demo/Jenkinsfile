@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        VENV = "venv"
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -12,8 +16,14 @@ pipeline {
             steps {
                 sh '''
                 echo "Current directory: $(pwd)"
-                python3 -m pip install --upgrade pip
-                python3 -m pip install -r python-demo/requirements.txt
+                
+                # Create and activate a virtual environment
+                python3 -m venv $VENV
+                source $VENV/bin/activate
+
+                # Upgrade pip and install dependencies
+                pip install --upgrade pip
+                pip install -r python-demo/requirements.txt
                 '''
             }
         }
@@ -24,7 +34,8 @@ pipeline {
                 echo "Running tests..."
                 ls -R  # List directory structure for debugging
                 
-                # Run tests without requiring __init__.py
+                # Activate virtual environment before running tests
+                source $VENV/bin/activate
                 PYTHONPATH=$(pwd)/python-demo python3 -m unittest discover -s python-demo/tests -p "test_*.py"
                 '''
             }
@@ -34,6 +45,10 @@ pipeline {
             steps {
                 sh '''
                 echo "Building the project..."
+                
+                # Ensure virtual environment is activated
+                source $VENV/bin/activate
+
                 mkdir -p build
                 cp -r python-demo/src/* build/
                 '''
