@@ -17,9 +17,11 @@ pipeline {
                 sh '''
                 echo "Current directory: $(pwd)"
                 
-                # Create and activate a virtual environment
+                # Create a virtual environment
                 python3 -m venv $VENV
-                source $VENV/bin/activate
+
+                # Activate virtual environment using '.' instead of 'source'
+                . $VENV/bin/activate
 
                 # Upgrade pip and install dependencies
                 pip install --upgrade pip
@@ -35,7 +37,7 @@ pipeline {
                 ls -R  # List directory structure for debugging
                 
                 # Activate virtual environment before running tests
-                source $VENV/bin/activate
+                . $VENV/bin/activate
                 PYTHONPATH=$(pwd)/python-demo python3 -m unittest discover -s python-demo/tests -p "test_*.py"
                 '''
             }
@@ -47,7 +49,7 @@ pipeline {
                 echo "Building the project..."
                 
                 # Ensure virtual environment is activated
-                source $VENV/bin/activate
+                . $VENV/bin/activate
 
                 mkdir -p build
                 cp -r python-demo/src/* build/
